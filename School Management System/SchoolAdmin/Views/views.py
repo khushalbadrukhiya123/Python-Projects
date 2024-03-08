@@ -1,7 +1,10 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.hashers import make_password, check_password
-from .models import *
-from django.http import JsonResponse,HttpResponse
+from ..models import *
+from django.http import JsonResponse,HttpResponse 
+from django.conf import settings
+from django.core.mail import send_mail
+import random
 
 
 # Create your views here.
@@ -19,6 +22,7 @@ def login(request):
                 request.session['user_role'] = select_user.user_role
                 request.session['user_email'] = select_user.user_email
                 request.session['user_name'] = select_user.user_name
+                request.session['user_image'] = select_user.user_image.url
                 return redirect('dashboard')
             else:
                 msg = "Wrong Password"
@@ -33,10 +37,16 @@ def login(request):
         except:
             return render(request,"login.html")
 
-
+def isLogin(request):
+     if request.session.get('is_login',False)==False:
+         return False
+     else:
+         return True
+        
     
 def dashboard(request):
-    if request.session.get('is_login',False)==False:
+   
+    if isLogin(request)==False:
         return redirect('login')
     
     if request.session.get('user_role','none')=="admin":
@@ -86,12 +96,16 @@ def addbranch(request):
                 return JsonResponse({'success':False})
         else:
             try:
+                user_image1 = request.FILES['user_image']
+            except:
+                user_image1 = "profile/default_img.jpg"
+            try:
                 users.objects.create(
                     user_role = "Branch",
                     user_name = request.POST['user_name'],
                     user_email = request.POST['user_email'],
                     user_password = make_password(request.POST['user_password']),
-                    user_image = request.FILES['user_image']
+                    user_image = user_image1
                 )
             except:
                 pass
@@ -124,3 +138,43 @@ def deleteBranch(request):
     selectbranch.delete()
     
     return JsonResponse({'success':True})
+
+def forgotPassword(request):
+    if request.method=="POST":
+        if request.POST['action'] == 'email':
+            email = request.POST['email']
+            try:
+                select_user = users.objects.get(user_email=email)
+                global otp
+                global cemail
+                otp=random.randint(100000,900000)
+                cemail = select_user.user_email
+                subject = 'Forgot Password'
+                message = f'Your OTP IS : {otp}'
+                email_from = settings.EMAIL_HOST_USER
+                recipient_list = [select_user.user_email, ]
+                send_mail( subject, message, email_from, recipient_list )
+                return render(request,"forgot-password.html",{"page":"otp"})
+            except:
+                msg = "Email Not Found";
+                return render(request,"forgot-password.html",{"msg":msg,"page":"email"})
+        elif request.POST['action'] == 'otp':
+            eotp = int(request.POST['eotp'])
+            if eotp==otp:
+                return render(request,"forgot-password.html",{"page":"password"})
+            else:
+                msg = "Wrong OTP"
+                return render(request,"forgot-password.html",{"msg":eotp,"page":"otp"})
+        elif request.POST['action'] == 'password':
+            npassword = request.POST['npassword']
+            cpassword = request.POST['cpassword']
+            if npassword == cpassword:
+                select_user = users.objects.get(user_email=cemail)
+                select_user.user_password=make_password(npassword)
+                select_user.save1()
+                return redirect('login')
+            else:
+                msg = "New password and confirm Password does not match"
+                return render(request,"forgot-password.html",{"msg":msg,"page":"password"})
+    else:    
+        return render(request,"forgot-password.html",{"page":"email"})

@@ -22,14 +22,10 @@
           <h5 class="form-title"><span>Login Details</span></h5>
        </div>
        <div class="col-sm-3 text-center">
-          {% if isedit == 1 %} 
-           <img src="{{ selectbranch.user_id.user_image.url }}" id="image_preview" alt="image" class="img-fluid rounded-circle center-cropped-profile"  style="margin-bottom:10px;">
-          {% else %}
-           <img src="{% static 'assets/user_default.jpg' %}" id="image_preview" alt="image" class="img-fluid rounded-circle center-cropped-profile"  style="margin-bottom:10px;">
-          {% endif %}
+            <img src="{{ selectbranch.user_id.user_image.url }}" id="image_preview" alt="image" class="img-fluid rounded-circle center-cropped-profile"  style="margin-bottom:10px;">
           <div class="input-group custom-file-button">
              <label class="input-group-text" for="inputGroupFile">Choose Photo</label>
-             <input type="file" class="form-control"  name="user_image" aria-label="file example" id="inputGroupFile" >
+             <input type="file" class="form-control"  name="user_image" aria-label="file example" id="inputGroupFile" onchange="readURL(this)" >
           </div>
        </div>
        <div class="col-9">

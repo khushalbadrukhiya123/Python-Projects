@@ -16,7 +16,8 @@ Including another URLconf
 """
 
 from django.urls import path
-from SchoolAdmin import views
+from SchoolAdmin.Views import views
+from SchoolAdmin.Views import studentView
 
 
 
@@ -27,4 +28,6 @@ urlpatterns = [
     path('addbranch/', views.addbranch,name="addbranch"),
     path('editBranch/', views.editBranch,name="editBranch"),
     path('deleteBranch/', views.deleteBranch,name="deleteBranch"),
+    path('forgotPassword/', views.forgotPassword,name="forgotPassword"),
+    path('testtt/', studentView.testtt,name="testtt"),
 ]
