@@ -62,56 +62,65 @@ def addbranch(request):
     if request.method=="POST":
         branchid=request.POST['branchid']
         if branchid!="":
-            branch_edit=branch.objects.get(id=branchid)
-            branch_edit.branch_name= request.POST['branch_name']
-            branch_edit.branch_address= request.POST['branch_address']
-           
-            id1=branch_edit.user_id_id
-            user_edit=users.objects.get(id=id1)
-            user_edit.user_name= request.POST['user_name']
-            user_edit.user_email= request.POST['user_email']
             try:
-                user_edit.user_image= request.FILES['user_image']
+                branch_edit=branch.objects.get(id=branchid)
+                branch_edit.branch_name= request.POST['branch_name']
+                branch_edit.branch_address= request.POST['branch_address']
+            
+                id1=branch_edit.user_id_id
+                user_edit=users.objects.get(id=id1)
+                user_edit.user_name= request.POST['user_name']
+                user_edit.user_email= request.POST['user_email']
+                try:
+                    user_edit.user_image= request.FILES['user_image']
+                except:
+                    user_edit.user_image = user_edit.user_image
+                    
+                if request.POST['user_password']!="":
+                    user_edit.user_password= make_password(request.POST['user_password'])
+                branch_edit.save()
+                user_edit.save()
+                
+                return JsonResponse({'success':True})
+            except:
+                return JsonResponse({'success':False})
+        else:
+            try:
+                users.objects.create(
+                    user_role = "Branch",
+                    user_name = request.POST['user_name'],
+                    user_email = request.POST['user_email'],
+                    user_password = make_password(request.POST['user_password']),
+                    user_image = request.FILES['user_image']
+                )
             except:
                 pass
-                
-            if request.POST['user_password']!="":
-                user_edit.user_password= request.POST['user_password']
-            branch_edit.save()
-            user_edit.save()
 
-            return JsonResponse({'success':True})
-        else:
-            users.objects.create(
-                user_role = "Branch",
-                user_name = request.POST['user_name'],
-                user_email = request.POST['user_email'],
-                user_password = make_password(request.POST['user_password']),
-                user_image = request.FILES['user_image']
-            )
             user_id1 = users.objects.latest('id')
             branch.objects.create(
                 user_id = user_id1,
                 branch_name = request.POST['branch_name'],
                 branch_address = request.POST['branch_address']   
             )
-           
             return JsonResponse({'success':True})
 
     else:
         all_branch = branch.objects.all()
         return render(request,"branch.html",{"all_branch":all_branch})
 
-def editBranch(request,branchid):
+
+def editBranch(request):
+    branchid = request.POST['id']
     selectbranch=branch.objects.get(id=branchid)
     all_branch = branch.objects.all()
-    return render(request,"branch.html",{"selectbranch":selectbranch,"all_branch":all_branch,"isedit":1})
+    return render(request,"ajax_form_editbranch.html",{"selectbranch":selectbranch,"all_branch":all_branch,"isedit":1})
 
-def deleteBranch(request,branchid):
+def deleteBranch(request):
+    branchid = request.POST['id']
     selectbranch=branch.objects.get(id=branchid)
     id1 = selectbranch.user_id_id
     selectuser=users.objects.get(id=id1)
     selectuser.delete()
     selectbranch.delete()
     
-    return redirect('addbranch')
+    return JsonResponse({'success':True})

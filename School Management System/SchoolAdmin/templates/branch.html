@@ -49,10 +49,10 @@
       <div class="row">
          <div class="col-sm-12">
             <div class="card">
-               <div class="card-body">
-                  <form enctype="multipart/form-data" id="frm" name="frm">
+               <div class="card-body" id="form_preview">
+                  <form enctype="multipart/form-data" id="branch_frm" name="branch_frm">
                      {% csrf_token %}
-                     <input type="hidden" name="branchid" value="{{selectbranch.id}}">
+                     <input type="hidden" name="branchid" value="{{selectbranch.id}}" id="branchid" />
                      <div class="row">
                         <div class="col-12">
                            <h5 class="form-title"><span>Basic Details</span></h5>
@@ -105,7 +105,7 @@
                         </div>
                         <div class="col-12">
                            <div class="student-submit">
-                              <button type="button" class="btn btn-primary" onClick="ins(document.frm)">Save</button>
+                              <button type="button" onClick="ins_branch(document.branch_frm)" class="btn btn-primary">Save</button>
                            </div>
                         </div>
                      </div>
@@ -119,7 +119,7 @@
                   </p>
                </div>
                <div class="card-body">
-                  <div class="table-responsive">
+                  <div class="table-responsive" id="viewtable">
                      <table class="datatable table table-stripped">
                         <thead>
                            <tr>
@@ -146,8 +146,8 @@
                                 {% endif %}
                             </td>
                               <td>
-                                <a href="{% url 'editBranch' row.id %}" class="btn btn-sm btn-rounded btn-primary"><i class="fa fa-edit" aria-hidden="true"></i></a>
-                                <a href="{% url 'deleteBranch' row.id %}" class="btn btn-sm btn-rounded btn-danger"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                <a  onClick="return selectRecord({{row.id}})" class="btn btn-sm btn-rounded btn-primary"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                <a  onClick="return delRecord({{row.id}})" class="btn btn-sm btn-rounded btn-danger"><i class="fa fa-trash" aria-hidden="true"></i></a>
 
                               </td>
                            </tr>
@@ -163,32 +163,106 @@
 </div>
 
 <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
 <script>
-    function ins(frm)
-    {
-        var f1 = new FormData(frm);
-       
-        // $("#frm").serialize();
-        //	var dt = $(frm).serialize();
-        $.ajax({
-            url:'{% url "addbranch" %}',
-            type:"post",
-            data:f1,
-            processData:false,
-            contentType:false,
-            dataType:"json",
-            success:function(data)
-            {
-                $('#frm')[0].reset(); 
-            }
-        });
-    }
+ function ins_branch(frm)
+ {
+   var f1 = new FormData(frm);
+   $.ajax({
+     url:'{% url "addbranch" %}',
+     type:"post",
+     data:f1,
+     processData:false,
+     contentType:false,
+     dataType:"json",
+     success:function(response)
+     {
+        if(response.success)
+        {
+          // $("#branch_frm")[0].reset();
+           $(':input','#branch_frm')
+            .not(':button, :submit, :reset, :hidden')
+            .val('')
+            .prop('checked', false)
+            .prop('selected', false);
+            
+           $('#branchid').val("");
+
+           $('#viewtable').load(document.URL + ' #viewtable');
+           $('#image_preview').attr('src', '{% static 'assets/user_default.jpg' %}');
+           swal({
+              title: "Good job!",
+              text: "Branch Save Successfully",
+              icon: "success"
+           });
+        }
+        else
+        {
+         swal("Fail");
+        }
+         
+     }
+ });
+ }
 </script>
 
 <script>
-    $(document).ready(function(){
+   function delRecord(id)
+   {
+      swal({
+         title: "Are you sure",
+         text: "Delete Branch?",
+         icon: "warning",
+         buttons: true,
+         dangerMode: true,
+       })
+       .then((willDelete) => {
+         if (willDelete) {
+
+            $.ajax({
+               url:"{% url 'deleteBranch' %}",
+               type:"post",
+               data:{'id':id},
+               headers: {
+                  'X-CSRFToken': '{{ csrf_token }}'
+              },
+               success: function()
+                     {
+                       
+                       $('#viewtable').load(document.URL + ' #viewtable');	
+                       Swal.fire({
+                        title: "Good job!",
+                        text: "Branch Delete Successfully",
+                        icon: "success"
+                      });
+                    }
+               });
+         } 
+       });
+
+
       
-      });
+   }
+</script>
+
+<script>
+   function selectRecord(id)
+   {
+      $.ajax({
+         url:"{% url 'editBranch' %}",
+         type:"post",
+         data:{'id':id},
+         headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+         success: function(data)
+         {
+            $('#form_preview').html(data);   
+                
+         }
+         });
+   }
       
 </script>
 

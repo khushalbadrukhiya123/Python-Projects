@@ -25,6 +25,6 @@ urlpatterns = [
     path('dashboard/', views.dashboard,name="dashboard"),
     path('logout/', views.logout,name="logout"),
     path('addbranch/', views.addbranch,name="addbranch"),
-    path('editBranch/<int:branchid>', views.editBranch,name="editBranch"),
-    path('deleteBranch/<int:branchid>', views.deleteBranch,name="deleteBranch"),
+    path('editBranch/', views.editBranch,name="editBranch"),
+    path('deleteBranch/', views.deleteBranch,name="deleteBranch"),
 ]

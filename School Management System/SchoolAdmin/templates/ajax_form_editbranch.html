@@ -1,0 +1,61 @@
+{% load static %}
+<form enctype="multipart/form-data" id="branch_frm" name="branch_frm">
+    {% csrf_token %}
+    <input type="hidden" name="branchid" value="{{selectbranch.id}}" id="branchid">
+    <div class="row">
+       <div class="col-12">
+          <h5 class="form-title"><span>Basic Details</span></h5>
+       </div>
+       <div class="col-12 col-sm-4">
+          <div class="form-group local-forms">
+             <label>Branch Name <span class="login-danger">*</span></label>
+             <input type="text" class="form-control" placeholder="Enter Name" name="branch_name" value="{{selectbranch.branch_name}}">
+          </div>
+       </div>
+       <div class="col-8">
+          <div class="form-group local-forms">
+             <label>Branch Address <span class="login-danger">*</span></label>
+             <input type="text" class="form-control" placeholder="Enter address" name="branch_address" value="{{selectbranch.branch_address}}">
+          </div>
+       </div>
+       <div class="col-12">
+          <h5 class="form-title"><span>Login Details</span></h5>
+       </div>
+       <div class="col-sm-3 text-center">
+          {% if isedit == 1 %} 
+           <img src="{{ selectbranch.user_id.user_image.url }}" id="image_preview" alt="image" class="img-fluid rounded-circle center-cropped-profile"  style="margin-bottom:10px;">
+          {% else %}
+           <img src="{% static 'assets/user_default.jpg' %}" id="image_preview" alt="image" class="img-fluid rounded-circle center-cropped-profile"  style="margin-bottom:10px;">
+          {% endif %}
+          <div class="input-group custom-file-button">
+             <label class="input-group-text" for="inputGroupFile">Choose Photo</label>
+             <input type="file" class="form-control"  name="user_image" aria-label="file example" id="inputGroupFile" >
+          </div>
+       </div>
+       <div class="col-9">
+          <div class="col-12 col-sm-12">
+             <div class="form-group local-forms">
+                <label>User Name <span class="login-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="Enter Username" name="user_name" value="{{selectbranch.user_id.user_name}}">
+             </div>
+          </div>
+          <div class="col-12 col-sm-12">
+             <div class="form-group local-forms">
+                <label>Email ID <span class="login-danger">*</span></label>
+                <input type="email" class="form-control" placeholder="Enter Mail Id" name="user_email" value="{{selectbranch.user_id.user_email}}">
+             </div>
+          </div>
+          <div class="col-12 col-sm-12">
+             <div class="form-group local-forms">
+                <label>Password <span class="login-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="Enter Password" name="user_password" >
+             </div>
+          </div>
+       </div>
+       <div class="col-12">
+          <div class="student-submit">
+            <button type="button" onClick="ins_branch(document.branch_frm)" class="btn btn-primary">Save</button>
+          </div>
+       </div>
+    </div>
+ </form>
